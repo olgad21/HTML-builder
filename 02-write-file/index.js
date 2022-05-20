@@ -17,14 +17,14 @@ console.log('Please add your text.');
 
 rl.on('line', (answer) => {
   if (answer === 'exit'){
-    process.exit();
-  } 
-  process.on('SIGINT', () => {
-    process.exit();
-  }); 
-  process.on('exit', () => {
-    console.log('Your text is saved. Thank you.');
-    process.exit();
-  });
-  writeStream.write(`${answer}\n`, 'utf8');
+    rl.close();
+  } else {
+    writeStream.write(`${answer}\n`, 'utf8');
+  }
+  
+  process.on('SIGINT', () => rl.close()); 
 }); 
+
+rl.on('close', () => {
+  console.log('Your text is saved. Thank you. rlonclose');
+});
