@@ -14,6 +14,7 @@ fsPromises.readdir(stylesPath, { withFileTypes: true })
         await initReadableStream(stylesData, file)
           .then(stylesData => {
             for (let styleFile of stylesData){
+              styleFile = `${styleFile}\n`;
               writeStream.write(styleFile);
             }
           });
