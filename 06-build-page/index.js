@@ -68,17 +68,15 @@ async function mergeStyles(){
 
   fsPromises.readdir(stylesPath, { withFileTypes: true })
     .then(async(files) => {
-      const stylesData = [];
+      let stylesData;
       const writeStream = fs.createWriteStream(path.join(__dirname, path.sep, 'project-dist/', 'style.css'));
     
       for (let file of files) {
         if (file.isFile() && file.name.endsWith('.css')){
           await initReadableStream(stylesData, file)
             .then(stylesData => {
-              for (let styleFile of stylesData){
-                styleFile = `${styleFile}\n`;
-                writeStream.write(styleFile);
-              }
+              stylesData = `${stylesData}\n`;
+              writeStream.write(stylesData);
             });
         }
       }
@@ -89,7 +87,7 @@ async function mergeStyles(){
       const readStream = fs.createReadStream(path.join(stylesPath, file.name));
 
       readStream.on('data', (chunk) => {
-        stylesData.push(chunk.toString());
+        stylesData = chunk.toString();
       });
       readStream.on('end', () => resolve(stylesData));
     });
