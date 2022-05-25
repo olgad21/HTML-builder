@@ -15,27 +15,54 @@ const dirPath = path.join(__dirname, path.sep, 'assets');
 
 async function copyDirectory(dirPath, newDirPath){
 
+
   fsPromises.readdir(dirPath, { withFileTypes: true})
     .then(async(files) => {
-      await fsPromises.mkdir(newDirPath, {recursive: true})
-        .then(async() => {
-          for (let file of files){
-            if(file.isDirectory()){
-              const newFilePath = path.join(newDirPath, file.name);
-              const filePath = path.join(dirPath, file.name);
-              await fsPromises.mkdir(newFilePath, {recursive: true});
-              await copyDirectory(filePath, newFilePath);
-            }
-            if(file.isFile()){
-              const newFilePath = path.join(newDirPath, file.name);
-              const filePath = path.join(dirPath, file.name);
-              await fsPromises.copyFile(filePath, newFilePath);
-            }
-          }
-        });
+      fs.access(newDirPath, fs.constants.F_OK, function(error) {
+        if (error){
+          fsPromises.mkdir(newDirPath, {recursive: true})
+            .then(async() => {
+              for (let file of files){
+                if(file.isDirectory()){
+                  const newFilePath = path.join(newDirPath, file.name);
+                  const filePath = path.join(dirPath, file.name);
+                  await fsPromises.mkdir(newFilePath, {recursive: true});
+                  await copyDirectory(filePath, newFilePath);
+                }
+                if(file.isFile()){
+                  const newFilePath = path.join(newDirPath, file.name);
+                  const filePath = path.join(dirPath, file.name);
+                  await fsPromises.copyFile(filePath, newFilePath);
+                }
+              }
+            });
+
+        } else {
+          fsPromises.rm(newDirPath, {recursive: true})
+            .then(async() => {
+              await fsPromises.mkdir(newDirPath, {recursive: true})
+                .then(async() => {
+                  for (let file of files){
+                    if(file.isDirectory()){
+                      const newFilePath = path.join(newDirPath, file.name);
+                      const filePath = path.join(dirPath, file.name);
+                      await fsPromises.mkdir(newFilePath, {recursive: true});
+                      await copyDirectory(filePath, newFilePath);
+                    }
+                    if(file.isFile()){
+                      const newFilePath = path.join(newDirPath, file.name);
+                      const filePath = path.join(dirPath, file.name);
+                      await fsPromises.copyFile(filePath, newFilePath);
+                    }
+                  }
+                });
+
+            });
+
+        }
+      });
     }); 
 }
-
 async function mergeStyles(){
   const stylesPath = path.join(__dirname, path.sep, 'styles');
 
